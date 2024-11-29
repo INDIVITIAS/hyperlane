@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Обновление пакетов и установка необходимых инструментов
+sudo apt-get update && sudo apt-get install -y \
+curl iptables build-essential git wget jq make gcc nano tmux htop nvme-cli \
+pkg-config libssl-dev libgmp3-dev tar clang bsdmainutils ncdu unzip llvm \
+libudev-dev protobuf-compiler cmake cargo openssl
+
+# Установка Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Установка Foundry
+curl -L https://foundry.paradigm.xyz | bash
+source ~/.bashrc
+foundryup
+
+# Установка NVM (Node Version Manager) и Node.js LTS
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.nvm/nvm.sh
+nvm install --lts
+nvm use --lts
+
+# Проверка версии npm и установка Hyperlane CLI
+npm --version
+npm install -g @hyperlane-xyz/cli
+hyperlane --version
+
+# Установка screen
+sudo apt install -y screen
+
+echo "Далее редактируйте конфиг по инструкции."
