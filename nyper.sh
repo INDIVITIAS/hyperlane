@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Функция для проверки и установки Git
+install_git() {
+    if ! [ -x "$(command -v git)" ]; then
+        echo "Git не установлен. Устанавливаем Git..."
+        sudo apt-get update && sudo apt-get install -y git
+    else
+        echo "Git уже установлен."
+    fi
+}
+
 # Функция для установки и запуска ноды
 install_and_run_node() {
     # Обновление пакетов и установка необходимых инструментов
@@ -103,13 +113,14 @@ remove_node() {
     echo "Нода полностью удалена."
 }
 
-# Меню
+# Основное меню
 PS3="Выберите действие: "
 options=("Установить и запустить ноду" "Просмотр логов" "Удалить ноду" "Выход")
 select opt in "${options[@]}"
 do
     case $opt in
         "Установить и запустить ноду")
+            install_git
             install_and_run_node
             ;;
         "Просмотр логов")
