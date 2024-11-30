@@ -80,7 +80,13 @@ generate_ssh_key() {
 
 # Функция для запуска ноды
 start_node() {
-    read -p "Введите ваш приватный ключ EVM: " private_key
+    if [ ! -f "$HOME/.private_key" ]; then
+        read -p "Введите ваш приватный ключ EVM: " private_key
+        echo "$private_key" > $HOME/.private_key
+    else
+        private_key=$(cat $HOME/.private_key)
+    fi
+
     echo "Запускаем ноду..."
     git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
     screen -S hyperlane
@@ -95,6 +101,13 @@ start_node() {
         --validator.key "0x${private_key}"
 }
 
+# Функция для перезапуска ноды
+restart_node() {
+    echo "Перезапускаем ноду..."
+    screen -S hyperlane -p 0 -X quit
+    start_node
+}
+
 # Функция для просмотра логов
 view_logs() {
     echo "Просмотр логов ноды..."
@@ -107,12 +120,13 @@ remove_node() {
     screen -S hyperlane -X quit
     rm -rf $HOME/hyperlane-monorepo
     rm -rf /tmp/hyperlane-validator-signatures-base
+    rm -f $HOME/.private_key
     echo "Нода полностью удалена."
 }
 
 # Основное меню
 PS3="Выберите действие: "
-options=("Установить и настроить ноду" "Генерация ключа SSH" "Запустить ноду" "Просмотр логов" "Удалить ноду" "Выход")
+options=("Установить и настроить ноду" "Генерация ключа SSH" "Запустить ноду" "Перезапустить ноду" "Просмотр логов" "Удалить ноду" "Выход")
 select opt in "${options[@]}"
 do
     case $opt in
@@ -125,6 +139,9 @@ do
             ;;
         "Запустить ноду")
             start_node
+            ;;
+        "Перезапустить ноду")
+            restart_node
             ;;
         "Просмотр логов")
             view_logs
