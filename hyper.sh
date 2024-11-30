@@ -83,7 +83,7 @@ show_menu() {
     echo -e "    ${GREEN}Текущая директория:${RESET} ${current_dir}"
     echo -e "    ${GREEN}IP-адрес:${RESET} ${ip_address}"
     draw_middle_border
-    echo -e " ${GREEN}Выберите действие:${RESET}"
+    echo -e " ${GREEN}Выберите 1 действие:${RESET}"
     echo -e "  ${ICON_INSTALL} ${YELLOW}1) Установить и настроить ноду${RESET}"
     echo -e "  ${ICON_SSH} ${YELLOW}2) Генерация ключа SSH${RESET}"
     echo -e "  ${ICON_START} ${YELLOW}3) Запустить ноду${RESET}"
@@ -202,7 +202,7 @@ start_node() {
         --originChainName base \
         --checkpointSyncer.type localStorage \
         --checkpointSyncer.path $VALIDATOR_SIGNATURES_DIR \
-        --validator.key 0x${private_key}"
+        --validator.key ${private_key}"
     
     echo "Нода запущена. Чтобы присоединиться к сеансу, используйте команду: screen -r hyperlane"
 }
