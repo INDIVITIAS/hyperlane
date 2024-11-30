@@ -35,22 +35,38 @@ install_and_configure_node() {
     sudo apt install -y screen
 
     echo "Настраиваем конфигурацию Hyperlane..."
-    output=$(hyperlane core init --advanced)
+    hyperlane core init --advanced
 
-    if echo "$output" | grep -q "✅ Successfully created new core deployment config."; then
-        echo "Выполняем hyperlane core deploy..."
-        deploy_output=$(hyperlane core deploy)
-        
-        if echo "$deploy_output" | grep -q "✅ Core contract deployments complete:"; then
-            echo "Настраиваем агента Hyperlane..."
-            hyperlane registry agent-config --chains base
-
-            export CONFIG_FILES=$HOME/configs/agent-config.json
-            mkdir -p /tmp/hyperlane-validator-signatures-base
-            export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
-            mkdir -p $VALIDATOR_SIGNATURES_DIR
+    echo "Ожидание завершения настройки... Пожалуйста, введите все необходимые данные."
+    
+    while true; do
+        if grep -q "✅ Successfully created new core deployment config." ~/.screenlog.0; then
+            echo "Конфигурация завершена, продолжаем..."
+            break
         fi
-    fi
+        sleep 5
+    done
+
+    echo "Выполняем hyperlane core deploy..."
+    hyperlane core deploy
+
+    echo "Ожидание завершения развертывания..."
+    
+    while true; do
+        if grep -q "✅ Core contract deployments complete:" ~/.screenlog.0; then
+            echo "Развертывание завершено, продолжаем..."
+            break
+        fi
+        sleep 5
+    done
+
+    echo "Настраиваем агента Hyperlane..."
+    hyperlane registry agent-config --chains base
+
+    export CONFIG_FILES=$HOME/configs/agent-config.json
+    mkdir -p /tmp/hyperlane-validator-signatures-base
+    export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
+    mkdir -p $VALIDATOR_SIGNATURES_DIR
 
     echo "Настройка ноды завершена."
 }
