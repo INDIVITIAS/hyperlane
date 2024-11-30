@@ -124,7 +124,7 @@ view_logs() {
 # Функция для удаления ноды
 remove_node() {
     echo "Удаление ноды..."
-    screen -S hyperlane -X quit
+    screen -ls | grep ".hyperlane" | awk '{print $1}' | xargs -I{} screen -S {} -X quit
     rm -rf $HOME/hyperlane-monorepo
     rm -rf /tmp/hyperlane-validator-signatures-base
     rm -f $HOME/.private_key
