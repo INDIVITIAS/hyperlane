@@ -35,12 +35,12 @@ install_and_configure_node() {
     sudo apt install -y screen
 
     echo "Настраиваем конфигурацию Hyperlane..."
-    hyperlane core init --advanced
+    hyperlane core init --advanced | tee /tmp/hyperlane_core_init.log
 
     echo "Ожидание завершения настройки... Пожалуйста, введите все необходимые данные."
     
     while true; do
-        if grep -q "✅ Successfully created new core deployment config." ~/.screenlog.0; then
+        if grep -q "✅ Successfully created new core deployment config." /tmp/hyperlane_core_init.log; then
             echo "Конфигурация завершена, продолжаем..."
             break
         fi
@@ -48,12 +48,12 @@ install_and_configure_node() {
     done
 
     echo "Выполняем hyperlane core deploy..."
-    hyperlane core deploy
+    hyperlane core deploy | tee /tmp/hyperlane_core_deploy.log
 
     echo "Ожидание завершения развертывания..."
     
     while true; do
-        if grep -q "✅ Core contract deployments complete:" ~/.screenlog.0; then
+        if grep -q "✅ Core contract deployments complete:" /tmp/hyperlane_core_deploy.log; then
             echo "Развертывание завершено, продолжаем..."
             break
         fi
