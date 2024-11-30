@@ -35,27 +35,22 @@ install_and_configure_node() {
     sudo apt install -y screen
 
     echo "Настраиваем конфигурацию Hyperlane..."
-    screen -dmS hyperlane_config bash -c 'hyperlane core init --advanced; exec bash'
+    output=$(hyperlane core init --advanced)
 
-    while ! screen -list | grep -q "hyperlane_config"; do
-        sleep 1
-    done
+    if echo "$output" | grep -q "✅ Successfully created new core deployment config."; then
+        echo "Выполняем hyperlane core deploy..."
+        deploy_output=$(hyperlane core deploy)
+        
+        if echo "$deploy_output" | grep -q "✅ Core contract deployments complete:"; then
+            echo "Настраиваем агента Hyperlane..."
+            hyperlane registry agent-config --chains base
 
-    while screen -list | grep -q "hyperlane_config"; do
-        screen -S hyperlane_config -X stuff '\n'
-        if screen -S hyperlane_config -X hardcopy .hyperlane_config.log; grep -q "✅ Successfully created new core deployment config." .hyperlane_config.log; then
-            screen -S hyperlane_config -X stuff 'hyperlane core deploy\n'
+            export CONFIG_FILES=$HOME/configs/agent-config.json
+            mkdir -p /tmp/hyperlane-validator-signatures-base
+            export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
+            mkdir -p $VALIDATOR_SIGNATURES_DIR
         fi
-        if screen -S hyperlane_config -X hardcopy .hyperlane_config.log; grep -q "✅ Core contract deployments complete:" .hyperlane_config.log; then
-            screen -S hyperlane_config -X stuff 'hyperlane registry agent-config --chains base\n'
-            screen -S hyperlane_config -X stuff 'export CONFIG_FILES=$HOME/configs/agent-config.json\n'
-            screen -S hyperlane_config -X stuff 'mkdir -p /tmp/hyperlane-validator-signatures-base\n'
-            screen -S hyperlane_config -X stuff 'export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base\n'
-            screen -S hyperlane_config -X stuff 'mkdir -p $VALIDATOR_SIGNATURES_DIR\n'
-            break
-        fi
-        sleep 5
-    done
+    fi
 
     echo "Настройка ноды завершена."
 }
