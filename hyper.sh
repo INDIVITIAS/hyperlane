@@ -82,6 +82,13 @@ generate_ssh_key() {
 start_node() {
     if [ ! -f "$HOME/.private_key" ]; then
         read -p "Введите ваш приватный ключ EVM: " private_key
+
+        # Проверка на пустое поле
+        if [ -z "$private_key" ]; then
+            echo "Ошибка: Приватный ключ не может быть пустым. Возвращение в главное меню."
+            return
+        fi
+
         echo "$private_key" > $HOME/.private_key
     else
         private_key=$(cat $HOME/.private_key)
