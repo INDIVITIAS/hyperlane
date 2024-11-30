@@ -43,59 +43,32 @@ install_and_run_node() {
 
     # Настройка конфигурации Hyperlane
     echo "Настраиваем конфигурацию Hyperlane..."
-    hyperlane core init --advanced
-    read -p "Введите адрес вашего EVM кошелька: " owner_address
-    echo $owner_address
-    echo "Выбираем messageIdMultisigIsm"
-    echo $owner_address
-    echo "Введите адреса валидаторов (через запятую): " $owner_address
-    echo "1"
-    echo "Выбираем merkleTreeHook"
-    echo "Выбираем aggregationHook"
-    echo "Введите адрес владельца для hook: " $owner_address
-    echo "YES"
-    echo "Введите максимальный протокольный сбор: 100000000000000000000"
-    echo "Введите протокольный сбор: 0.1"
-    echo "Введите адрес владельца ProxyAdmin: " $owner_address
-    echo "hyperlane core deploy"
-    read -p "Введите ваш приватный ключ EVM: " HYP_Key
-    echo "0x${HYP_Key}"
-    echo "Выбираем сеть (mainnet/testnet): " 
-    read -p "Выберите сеть для подключения: " network
-    echo $network
-    echo "NO"
-    echo "YES"
-    echo "YES"
-    echo "hyperlane registry agent-config --chains base"
-    export CONFIG_FILES=$HOME/configs/agent-config.json
-    mkdir -p /tmp/hyperlane-validator-signatures-base
-    export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
-    mkdir -p $VALIDATOR_SIGNATURES_DIR
+    hyperlane core init --advanced | while read line; do
+        echo "$line"
+        if echo "$line" | grep -q "✅ Core contract deployments complete:"; then
+            echo "Настройка агента Hyperlane..."
+            export CONFIG_FILES=$HOME/configs/agent-config.json
+            mkdir -p /tmp/hyperlane-validator-signatures-base
+            export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
+            mkdir -p $VALIDATOR_SIGNATURES_DIR
+        fi
+    done
+}
 
-    # Генерация SSH ключа и настройка GitHub
+# Функция для просмотра ключа SSH
+view_ssh_key() {
+    # Генерация SSH ключа
     echo "Генерация SSH ключа..."
-    ssh-keygen -t rsa -b 4096 -C Hyperlane
-    cat ~/.ssh/id_rsa.pub
-
-    echo "Скопируйте ключ и добавьте его в GitHub -> Settings -> SSH and GPG keys -> New SSH key"
-
-    # Клонирование репозитория Hyperlane
-    echo "Клонирование репозитория Hyperlane..."
-    git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
-    cd hyperlane-monorepo
-    cd rust
-    cd main
-
-    # Запуск ноды
-    echo "Запуск ноды..."
-    screen -S hyperlane -d -m cargo run --release --bin validator -- \
-        --db ./hyperlane_db_validator_base\
-        --originChainName base\
-        --checkpointSyncer.type localStorage \
-        --checkpointSyncer.path $VALIDATOR_SIGNATURES_DIR \
-        --validator.key "0x${HYP_Key}"
-
-    echo "Установка завершена. Нода запущена и работает."
+    ssh-keygen -t rsa -b 4096 -C Hyperlane | while read line; do
+        echo "$line"
+        if echo "$line" | grep -q "SHA256"; then
+            sleep 5
+            cat ~/.ssh/id_rsa.pub
+            sleep 120
+            git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
+            break
+        fi
+    done
 }
 
 # Функция для просмотра логов
@@ -115,13 +88,16 @@ remove_node() {
 
 # Основное меню
 PS3="Выберите действие: "
-options=("Установить и запустить ноду" "Просмотр логов" "Удалить ноду" "Выход")
+options=("Установить и запустить ноду" "Просмотр ключа SSH" "Просмотр логов" "Удалить ноду" "Выход")
 select opt in "${options[@]}"
 do
     case $opt in
         "Установить и запустить ноду")
             install_git
             install_and_run_node
+            ;;
+        "Просмотр ключа SSH")
+            view_ssh_key
             ;;
         "Просмотр логов")
             view_logs
