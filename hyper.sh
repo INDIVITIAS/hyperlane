@@ -127,6 +127,9 @@ install_and_configure_node() {
     hyperlane --version
     
     sudo apt install -y screen
+    
+    echo "Обновляем Rust до последней версии..."
+    rustup update stable
 
     echo "Настраиваем конфигурацию Hyperlane..."
     hyperlane core init --advanced | tee /tmp/hyperlane_core_init.log
