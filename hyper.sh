@@ -190,6 +190,7 @@ start_node() {
 
     echo "Запускаем ноду..."
     git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
+    sleep 20
     screen -d -m -S hyperlane bash -c "cd hyperlane-monorepo/rust/main && cargo run --release --bin validator -- \
         --db ./hyperlane_db_validator_base \
         --originChainName base \
