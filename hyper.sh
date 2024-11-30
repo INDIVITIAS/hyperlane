@@ -196,7 +196,7 @@ start_node() {
         --originChainName base \
         --checkpointSyncer.type localStorage \
         --checkpointSyncer.path $VALIDATOR_SIGNATURES_DIR \
-        --validator.key "0x${private_key}"
+        --validator.key 0x${private_key}
 }
 
 restart_node() {
