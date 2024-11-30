@@ -190,16 +190,14 @@ start_node() {
 
     echo "Запускаем ноду..."
     git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
-    screen -S hyperlane
-    cd hyperlane-monorepo
-    cd rust
-    cd main
-    cargo run --release --bin validator -- \
+    screen -d -m -S hyperlane bash -c "cd hyperlane-monorepo/rust/main && cargo run --release --bin validator -- \
         --db ./hyperlane_db_validator_base \
         --originChainName base \
         --checkpointSyncer.type localStorage \
         --checkpointSyncer.path $VALIDATOR_SIGNATURES_DIR \
-        --validator.key 0x${private_key}
+        --validator.key 0x${private_key}"
+    
+    echo "Нода запущена. Чтобы присоединиться к сеансу, используйте команду: screen -r hyperlane"
 }
 
 restart_node() {
