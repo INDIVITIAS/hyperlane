@@ -43,32 +43,31 @@ install_and_run_node() {
 
     # Настройка конфигурации Hyperlane
     echo "Настраиваем конфигурацию Hyperlane..."
-    hyperlane core init --advanced | while read line; do
-        echo "$line"
-        if echo "$line" | grep -q "✅ Core contract deployments complete:"; then
-            echo "Настройка агента Hyperlane..."
-            export CONFIG_FILES=$HOME/configs/agent-config.json
-            mkdir -p /tmp/hyperlane-validator-signatures-base
-            export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
-            mkdir -p $VALIDATOR_SIGNATURES_DIR
-        fi
-    done
+    hyperlane core init --advanced
+
+    # Проверка успешного завершения
+    if grep -q "✅ Core contract deployments complete:" <<< "$(hyperlane core init --advanced)"; then
+        echo "Настройка агента Hyperlane..."
+        export CONFIG_FILES=$HOME/configs/agent-config.json
+        mkdir -p /tmp/hyperlane-validator-signatures-base
+        export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-base
+        mkdir -p $VALIDATOR_SIGNATURES_DIR
+    fi
 }
 
 # Функция для просмотра ключа SSH
 view_ssh_key() {
     # Генерация SSH ключа
     echo "Генерация SSH ключа..."
-    ssh-keygen -t rsa -b 4096 -C Hyperlane | while read line; do
-        echo "$line"
-        if echo "$line" | grep -q "SHA256"; then
-            sleep 5
-            cat ~/.ssh/id_rsa.pub
-            sleep 120
-            git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
-            break
-        fi
-    done
+    ssh-keygen -t rsa -b 4096 -C Hyperlane
+
+    # Проверка успешного завершения
+    if grep -q "SHA256" <<< "$(ssh-keygen -t rsa -b 4096 -C Hyperlane)"; then
+        sleep 5
+        cat ~/.ssh/id_rsa.pub
+        sleep 120
+        git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
+    fi
 }
 
 # Функция для просмотра логов
