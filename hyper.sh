@@ -127,7 +127,13 @@ install_and_configure_node() {
     hyperlane --version
     
     sudo apt install -y screen
-    
+   # Установка rustup, если он еще не установлен
+    if ! command -v rustup &> /dev/null; then
+        echo "rustup не найден. Устанавливаем rustup..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+    fi
+
     echo "Обновляем Rust до последней версии..."
     rustup update stable
 
